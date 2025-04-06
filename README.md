@@ -9,6 +9,7 @@ Una sencilla pero funcional aplicación web de temporizador Pomodoro construida 
 
 *   **⏱️ Temporizador Pomodoro:** Ciclos de trabajo estándar de 25 minutos.
 *   **☕ Descansos Programados:** Descansos cortos de 5 minutos y descansos largos de 15 minutos después de cada 4 pomodoros.
+*   **⚙️Tiempos Configurables:** ¡Ajusta la duración de los ciclos de trabajo, descanso corto y descanso largo a tu gusto! Accede a los ajustes haciendo clic en el icono del **engranaje** ⚙️ en la esquina superior derecha. Tus preferencias se guardarán automáticamente en el navegador para futuras sesiones.
 *   **⏯️ Controles Intuitivos:** Botones para Iniciar, Pausar, Reanudar y Reiniciar el temporizador.
 *   **📊 Contador de Pomodoros:** Lleva la cuenta de cuántos ciclos de trabajo has completado.
 *   **🔔 Alertas Sonoras:** Recibe una notificación sonora (¡asegúrate de tener el archivo `alert.mp3`!) cuando termina un intervalo. El sonido se detiene cuando interactúas con los controles.
