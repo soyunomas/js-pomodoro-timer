@@ -20,7 +20,6 @@ Una sencilla pero funcional aplicación web de temporizador Pomodoro construida 
 ## 🖼️ Captura de Pantalla
 
 ![Captura de pantalla](screenshot.png)
-*(Asegúrate de que el archivo `screenshot.png` esté en la raíz de tu repositorio)*
 
 ## 🚀 Demo en Vivo
 
