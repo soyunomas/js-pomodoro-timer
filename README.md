@@ -32,7 +32,7 @@ Puedes probar la aplicación directamente aquí:
 *   🌐 **HTML5:** Estructura semántica del contenido.
 *   🎨 **CSS3:** Estilos personalizados mínimos y el poder de...
 *   🅱️ **Bootstrap 5.3.3:** Framework CSS para diseño responsivo y componentes UI.
-*   <0xF0><0x9F><0x9B><0xAE>️ **Bootstrap Icons 1.11.3:** Iconos para el cambio de tema.
+*   **Bootstrap Icons 1.11.3:** Iconos para el cambio de tema.
 *   🍦 **Vanilla JavaScript (ES6+):** Toda la lógica del temporizador, manejo de estado, manipulación del DOM y control de audio.
 *   💾 **LocalStorage API:** Para guardar la preferencia del tema del usuario.
 *   🔊 **Web Audio API (`new Audio()`):** Para reproducir las alertas sonoras.
