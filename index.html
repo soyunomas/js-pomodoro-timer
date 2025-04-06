@@ -29,13 +29,23 @@
         #settings-section .form-select {
             margin-bottom: 0.75rem;
         }
+
+        /* Estilos para parpadeo */
+        body.is-flashing {
+            /* Transición suave para el cambio de color */
+            transition: background-color 0.2s ease-in-out !important;
+        }
+        body.is-flashing.flash-active {
+            /* Color de fondo durante el parpadeo activo (se adapta a tema claro/oscuro) */
+            background-color: var(--bs-warning-bg-subtle) !important;
+        }
     </style>
 </head>
 <body>
     <!-- Contenedor para botones de icono en la esquina -->
-    <div class="position-fixed top-0 end-0 m-3 d-flex flex-column">
+    <div class="position-fixed top-0 end-0 m-3 d-flex">
         <!-- Botón para cambiar tema -->
-        <button id="theme-toggle-button" class="btn icon-button border-0 mb-2" title="Cambiar tema">
+        <button id="theme-toggle-button" class="btn icon-button border-0 me-2" title="Cambiar tema">
             <i class="bi bi-moon-stars-fill"></i>
         </button>
         <!-- Botón para abrir/cerrar ajustes -->
@@ -51,18 +61,16 @@
                 <!-- Sección de Ajustes Colapsable -->
                 <div class="collapse mb-3" id="settingsCollapse">
                     <div class="card card-body bg-body-tertiary" id="settings-section">
-                        <!-- Título Modificado -->
                         <h5 class="mb-3 text-center">Ajustes duración trabajo y descansos</h5>
                         <div class="row">
                             <div class="col-sm-4">
                                 <label for="pomodoro-duration-select" class="form-label">Trabajo (min)</label>
-                                <!-- Opciones actualizadas -->
                                 <select class="form-select form-select-sm" id="pomodoro-duration-select">
                                     <option value="300">5</option>
                                     <option value="600">10</option>
                                     <option value="900">15</option>
                                     <option value="1200">20</option>
-                                    <option value="1500">25</option> <!-- Default JS -->
+                                    <option value="1500">25</option>
                                     <option value="1800">30</option>
                                     <option value="2100">35</option>
                                     <option value="2400">40</option>
@@ -72,9 +80,8 @@
                             </div>
                             <div class="col-sm-4">
                                 <label for="short-break-duration-select" class="form-label">Desc. Corto (min)</label>
-                                <!-- Opciones actualizadas -->
                                 <select class="form-select form-select-sm" id="short-break-duration-select">
-                                    <option value="300">5</option> <!-- Default JS y mínimo -->
+                                    <option value="300">5</option>
                                     <option value="420">7</option>
                                     <option value="600">10</option>
                                     <option value="900">15</option>
@@ -82,11 +89,10 @@
                             </div>
                             <div class="col-sm-4">
                                 <label for="long-break-duration-select" class="form-label">Desc. Largo (min)</label>
-                                <!-- Opciones actualizadas -->
                                 <select class="form-select form-select-sm" id="long-break-duration-select">
                                     <option value="300">5</option>
                                     <option value="600">10</option>
-                                    <option value="900">15</option> <!-- Default JS -->
+                                    <option value="900">15</option>
                                     <option value="1200">20</option>
                                     <option value="1500">25</option>
                                     <option value="1800">30</option>
@@ -107,7 +113,7 @@
                         </div>
 
                         <div id="time-left" class="display-1 text-center my-4">
-                            25:00 <!-- Valor inicial, será actualizado por JS -->
+                            25:00
                         </div>
 
                         <div class="text-center mb-4">
@@ -133,13 +139,14 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- Configuración Inicial (Defaults) ---
-            // Los defaults siguen siendo >= 5 minutos, así que no necesitan cambio aquí.
-            let pomodoroDurationSetting = 1500; // 25 * 60
-            let shortBreakDurationSetting = 300;  // 5 * 60
-            let longBreakDurationSetting = 900;   // 15 * 60
+            let pomodoroDurationSetting = 1500;
+            let shortBreakDurationSetting = 300;
+            let longBreakDurationSetting = 900;
 
             const POMODOROS_PER_LONG_BREAK = 4;
             const ALERT_SOUND_SRC = 'alert.mp3';
+            // const FLASH_DURATION = 4000; // Ya no se usa
+            const FLASH_INTERVAL_MS = 400;
 
             // --- Referencias al DOM ---
             const timerLabelEl = document.getElementById('timer-label');
@@ -153,6 +160,7 @@
             const shortBreakDurationSelect = document.getElementById('short-break-duration-select');
             const longBreakDurationSelect = document.getElementById('long-break-duration-select');
             const htmlElement = document.documentElement;
+            const bodyElement = document.body;
             const themeIcon = themeToggleButton.querySelector('i');
 
             // --- Iconos Tema ---
@@ -171,12 +179,40 @@
             let isSoundPlaying = false;
             let audioPrimed = false;
 
-            // --- Variables de Estado (Temporizador) ---
+            // --- Variables de Estado (Temporizador y Parpadeo) ---
             let timerInterval = null;
             let timeLeft = pomodoroDurationSetting;
             let isRunning = false;
             let currentState = 'pomodoro';
             let pomodorosCompleted = 0;
+            let flashInterval = null;
+
+            // --- Funciones de Parpadeo ---
+            function startFlashing() {
+                if (flashInterval) return;
+
+                bodyElement.classList.add('is-flashing');
+                let flashOn = false;
+                flashInterval = setInterval(() => {
+                    flashOn = !flashOn;
+                    if (flashOn) {
+                        bodyElement.classList.add('flash-active');
+                    } else {
+                        bodyElement.classList.remove('flash-active');
+                    }
+                }, FLASH_INTERVAL_MS);
+                // Ya no hay detención automática con setTimeout
+                console.log("Iniciando parpadeo (continuo hasta interacción)...");
+            }
+
+            function stopFlashing() {
+                if (flashInterval) {
+                    clearInterval(flashInterval);
+                    flashInterval = null;
+                    bodyElement.classList.remove('is-flashing', 'flash-active');
+                    console.log("Parpadeo detenido.");
+                }
+            }
 
             // --- Funciones Temporizador ---
             function formatTime(seconds) {
@@ -228,6 +264,7 @@
                     isSoundPlaying = false;
                     console.log("Sonido de alerta detenido.");
                 }
+                stopFlashing(); // Detener parpadeo al detener el sonido (por interacción)
             }
 
              function decrementTime() {
@@ -242,6 +279,7 @@
                     console.log("Iniciando sonido de alerta...");
                     alertSound.play().catch(e => console.error("Error al reproducir sonido:", e));
                     isSoundPlaying = true;
+                    startFlashing(); // Iniciar parpadeo visual (ahora continuo)
 
                     switchState();
                     updateDisplay();
@@ -249,7 +287,7 @@
             }
 
              function toggleTimer() {
-                stopAlertSound();
+                stopAlertSound(); // Detiene sonido y parpadeo si estaban activos
 
                 if (isRunning) { // Pausar
                     clearInterval(timerInterval);
@@ -274,7 +312,7 @@
             }
 
              function resetTimer() {
-                stopAlertSound();
+                stopAlertSound(); // Detiene sonido y parpadeo si estaban activos
                 clearInterval(timerInterval);
                 timerInterval = null;
                 isRunning = false;
@@ -321,29 +359,24 @@
 
             // --- Funciones de Ajustes ---
             function loadSettings() {
-                // Carga desde localStorage O usa el default definido arriba
                 const savedPomodoro = localStorage.getItem('pomodoroDuration');
                 const savedShortBreak = localStorage.getItem('shortBreakDuration');
                 const savedLongBreak = localStorage.getItem('longBreakDuration');
 
-                // Asegurarse de que los valores cargados no sean inválidos o menores que el mínimo (5min = 300s)
                 pomodoroDurationSetting = Math.max(300, parseInt(savedPomodoro || pomodoroDurationSetting, 10));
                 shortBreakDurationSetting = Math.max(300, parseInt(savedShortBreak || shortBreakDurationSetting, 10));
                 longBreakDurationSetting = Math.max(300, parseInt(savedLongBreak || longBreakDurationSetting, 10));
 
-                // Guardar los valores (posiblemente corregidos) de nuevo por si acaso
                 localStorage.setItem('pomodoroDuration', pomodoroDurationSetting);
                 localStorage.setItem('shortBreakDuration', shortBreakDurationSetting);
                 localStorage.setItem('longBreakDuration', longBreakDurationSetting);
 
-                // Actualizar los <select>
                 pomodoroDurationSelect.value = pomodoroDurationSetting;
                 shortBreakDurationSelect.value = shortBreakDurationSetting;
                 longBreakDurationSelect.value = longBreakDurationSetting;
 
-                 // Asegurarse de que el valor seleccionado exista en las opciones actualizadas, si no, seleccionar el default
                 if (!pomodoroDurationSelect.querySelector(`option[value="${pomodoroDurationSetting}"]`)) {
-                     pomodoroDurationSelect.value = 1500; // Valor default si el guardado no está
+                     pomodoroDurationSelect.value = 1500;
                      pomodoroDurationSetting = 1500;
                      localStorage.setItem('pomodoroDuration', pomodoroDurationSetting);
                  }
@@ -357,7 +390,6 @@
                      longBreakDurationSetting = 900;
                      localStorage.setItem('longBreakDuration', longBreakDurationSetting);
                  }
-
 
                 console.log('Ajustes cargados/corregidos:', {
                     pomodoro: pomodoroDurationSetting,
@@ -398,13 +430,12 @@
                 }
             }
 
-
             // --- Inicialización ---
             function init() {
-                loadSettings(); // Cargar ajustes ANTES de configurar estado inicial
+                loadSettings();
 
                 currentState = 'pomodoro';
-                timeLeft = pomodoroDurationSetting; // Usa la duración cargada/default
+                timeLeft = pomodoroDurationSetting;
                 updateDisplay();
 
                 // Listeners
